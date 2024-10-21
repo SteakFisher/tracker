@@ -1,7 +1,9 @@
 import { coordinatorTable } from "../../drizzle/schema";
 import { WayTrack } from "./WayTrack";
+import { User } from "./User";
+import { APIErrors } from "./APIErrors";
 
-export default class extends WayTrack.User {
+export class Coordinator extends User {
 	name: string | undefined;
 	schoolID: string | undefined;
 
@@ -19,11 +21,10 @@ export default class extends WayTrack.User {
 		schoolID: string;
 	}) {
 		await WayTrack.db.transaction(async (tx) => {
-			const user: InstanceType<(typeof WayTrack)["User"]> =
-				await super.createUser(
-					{ email, password, image, role: "coordinator" },
-					tx,
-				);
+			const user: InstanceType<typeof User> = await super.createUser(
+				{ email, password, image, role: "coordinator" },
+				tx,
+			);
 
 			if (!user.id) throw APIErrors.DB_ERROR("User not created");
 

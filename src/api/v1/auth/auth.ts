@@ -2,6 +2,9 @@ import express from "express";
 import { z } from "zod";
 import { WayTrack } from "../../../classes/WayTrack";
 import bcrypt from "bcrypt";
+import { APIErrors } from "../../../classes/APIErrors";
+import allowAccess from "../../../functions/allowAccess";
+import { signJWT } from "../../../functions/JWT";
 
 const router = express.Router();
 
@@ -19,36 +22,48 @@ router.post("/login", async (req, res) => {
 			await user.getUser({ email: body.email });
 
 			try {
-				if (!user.password) throw new Error("User not found");
+				if (!user.id || !user.email || !user.password || !user.role)
+					throw new Error("User not found");
 
 				const match = await bcrypt.compare(body.password, user.password);
 
 				if (!match) throw new Error("Incorrect password");
 
-				res.status(200).json({
-					success: true,
-					message: "SUCCESS",
-					data: {
-						user: {
-							id: user.id,
-							email: user.email,
-							image: user.image,
-							role: user.role,
-						},
-					},
+				const jwt = await signJWT({
+					id: user.id,
+					email: user.email,
+					role: user.role,
 				});
+
+				return res
+					.cookie("access_token", jwt, {
+						httpOnly: true,
+					})
+					.send({
+						error: false,
+						success_prop: {
+							message: "User logged in successfully",
+							data: {
+								id: user.id,
+								email: user.email,
+								image: user.image,
+								role: user.role,
+							},
+						},
+					})
+					.status(201);
 			} catch (e) {
-				res.status(400).json(APIErrors.GENERIC(e));
+				return res.status(400).json(APIErrors.GENERIC(e));
 			}
 		} catch (e) {
-			res.status(400).json(APIErrors.DB_ERROR(e));
+			return res.status(400).json(APIErrors.DB_ERROR(e));
 		}
 	} catch (e) {
-		res.status(400).json(APIErrors.INVALID_REQUEST_BODY(e));
+		return res.status(400).json(APIErrors.INVALID_REQUEST_BODY(e));
 	}
 });
 
-router.post("signup", async (req, res) => {
+router.post("/signup", allowAccess(["power"]), async (req, res) => {
 	try {
 		const signUpObject = z
 			.object({
@@ -86,7 +101,7 @@ router.post("signup", async (req, res) => {
 
 				if (!coordinator.id) throw new Error("Coordinator not created");
 
-				res.status(200).json({
+				return res.status(200).json({
 					success: true,
 					message: "SUCCESS",
 					data: {
@@ -100,10 +115,10 @@ router.post("signup", async (req, res) => {
 				});
 			}
 		} catch (e) {
-			res.status(400).json(APIErrors.DB_ERROR(e));
+			return res.status(400).json(APIErrors.DB_ERROR(e));
 		}
 	} catch (e) {
-		res.status(400).json(APIErrors.INVALID_REQUEST_BODY(e));
+		return res.status(400).json(APIErrors.INVALID_REQUEST_BODY(e));
 	}
 });
 

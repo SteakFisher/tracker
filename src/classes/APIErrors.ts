@@ -1,4 +1,4 @@
-class APIErrors {
+export class APIErrors {
 	public static DB_ERROR(error: any) {
 		console.error(error);
 		return {
