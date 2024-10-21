@@ -1,5 +1,5 @@
 export type Payload = {
 	id: string;
 	email: string;
-	role: "coordinator" | "power" | "student" | "bus";
+	role: "coordinator" | "power" | "student" | "driver";
 };

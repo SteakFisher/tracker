@@ -6,7 +6,7 @@ export const userTable = pgTable("user", {
 	id: uuid("id").primaryKey().defaultRandom(),
 	email: text("email").unique().notNull(),
 	password: text("password").notNull(),
-	image: text("image").default("https://i.imgur.com/Ifj5jtR.png")
+	image: text("image").default("https://i.imgur.com/Ifj5jtR.png"),
 });
 
 export const roleTable = pgTable("role", {
@@ -14,7 +14,7 @@ export const roleTable = pgTable("role", {
 		.primaryKey()
 		.references(() => userTable.id, { onDelete: "cascade" }),
 	role: text("role", {
-		enum: ["student", "coordinator", "power", "bus"],
+		enum: ["student", "coordinator", "power", "driver"],
 	}).notNull(),
 });
 

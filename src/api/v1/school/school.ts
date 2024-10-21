@@ -1,9 +1,7 @@
 import express from "express";
 import { APIErrors } from "../../../classes/APIErrors";
-import auth from "../../../functions/auth";
 import allowAccess from "../../../functions/allowAccess";
 import { z } from "zod";
-import { School } from "../../../classes/School";
 import { WayTrack } from "../../../classes/WayTrack";
 
 const router = express.Router();

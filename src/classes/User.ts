@@ -88,7 +88,7 @@ export class User implements IUser {
 			email: string;
 			password: string;
 			image?: string;
-			role: "student" | "coordinator" | "power" | "bus";
+			role: "student" | "coordinator" | "power" | "driver";
 		},
 		db: typeof Supabase,
 	): Promise<typeof this> {
