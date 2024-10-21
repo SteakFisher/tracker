@@ -1,9 +1,28 @@
 import { coordinatorTable } from "../../drizzle/schema";
 import { WayTrack } from "./WayTrack";
-import { User } from "./User";
+import { IUser, User } from "./User";
 import { APIErrors } from "./APIErrors";
 
-export class Coordinator extends User {
+export interface ICoordinator extends IUser {
+	name: string | undefined;
+	schoolID: string | undefined;
+
+	create({
+		email,
+		password,
+		image,
+		name,
+		schoolID,
+	}: {
+		email: string;
+		password: string;
+		image?: string;
+		name: string;
+		schoolID: string;
+	}): Promise<void>;
+}
+
+export class Coordinator extends User implements ICoordinator {
 	name: string | undefined;
 	schoolID: string | undefined;
 
