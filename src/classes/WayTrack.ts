@@ -4,6 +4,7 @@ import { Coordinator as CoordinatorClass } from "./Coordinator";
 import { School as SchoolClass } from "./School";
 import { Driver as DriverClass } from "./Driver";
 import { Bus as BusClass } from "./Bus";
+import { Stop as StopClass } from "./Stop";
 
 export class WayTrack {
 	static db = Supabase;
@@ -17,4 +18,6 @@ export class WayTrack {
 	static Driver = DriverClass;
 
 	static Bus = BusClass;
+
+	static Stop = StopClass;
 }

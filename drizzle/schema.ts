@@ -140,3 +140,28 @@ export const busRelation = relations(busTable, ({ one }) => ({
 		relationName: "BusSchoolRelation",
 	}),
 }));
+
+export const stopTable = pgTable("stop", {
+	id: uuid("id").primaryKey().defaultRandom(),
+	name: text("name").notNull(),
+	latitude: text("latitude").notNull(),
+	longitude: text("longitude").notNull(),
+	busID: uuid("busID")
+		.references(() => busTable.id, { onDelete: "cascade" })
+		.notNull(),
+	schoolID: uuid("schoolID")
+		.references(() => schoolTable.id, {
+			onDelete: "cascade",
+		})
+		.notNull(),
+});
+
+export const busStopTable = pgTable("bus-stop", {
+	id: uuid("id").primaryKey().defaultRandom(),
+	busID: uuid("busID")
+		.references(() => busTable.id, { onDelete: "cascade" })
+		.notNull(),
+	stopID: uuid("stopID")
+		.references(() => stopTable.id, { onDelete: "cascade" })
+		.notNull(),
+});

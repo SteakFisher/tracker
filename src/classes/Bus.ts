@@ -1,7 +1,25 @@
 import { db as Supabase } from "../../drizzle";
 import { busTable } from "../../drizzle/schema";
 
-export class Bus {
+export interface IBus {
+	id: string | undefined;
+	registrationNo: string | undefined;
+	busNo: string | undefined;
+	driverID: string | undefined;
+	schoolID: string | undefined;
+
+	create(
+		data: {
+			registrationNo: string;
+			busNo: string;
+			driverID: string;
+			schoolID: string;
+		},
+		db?: typeof Supabase,
+	): Promise<void>;
+}
+
+export class Bus implements IBus {
 	id: string | undefined;
 	registrationNo: string | undefined;
 	busNo: string | undefined;

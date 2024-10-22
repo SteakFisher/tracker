@@ -1,22 +1,21 @@
 import express from "express";
+import { APIErrors } from "../../../../../classes/APIErrors";
+import allowAccess from "../../../../../functions/allowAccess";
+import auth from "../../../../../functions/auth";
+import { WayTrack } from "../../../../../classes/WayTrack";
 import { z } from "zod";
-import auth from "../../../../functions/auth";
-import allowAccess from "../../../../functions/allowAccess";
-import { WayTrack } from "../../../../classes/WayTrack";
-import { APIErrors } from "../../../../classes/APIErrors";
-import stopRoute from "./stop/stop";
 
 const router = express.Router();
 
-router.use("/:schoolID/bus/", stopRoute);
-
 router.post(
-	"/:schoolID/bus",
+	"/:busID/stop",
 	allowAccess(["power", "coordinator"]),
 	async (req, res) => {
 		try {
+			let urlSplit = req.originalUrl.split("/");
+			let schoolID = urlSplit[urlSplit.length - 4];
+			const busID = req.params.busID;
 			const payload = await auth(req);
-			let schoolID = req.params.schoolID;
 
 			if (payload.role == "coordinator") {
 				const coordinator = new WayTrack.Coordinator();
@@ -29,35 +28,38 @@ router.post(
 			}
 
 			let reqBody = req.body;
+			reqBody.busID = busID;
 			reqBody.schoolID = schoolID;
 
 			try {
-				const busObject = z
+				const stopObject = z
 					.object({
-						registrationNo: z.string(),
-						busNo: z.string(),
-						driverID: z.string(),
+						name: z.string(),
+						latitude: z.string(),
+						longitude: z.string(),
+						busID: z.string(),
 						schoolID: z.string(),
 					})
 					.strict()
 					.parse(reqBody);
 
 				try {
-					const bus = new WayTrack.Bus();
-					await bus.create(busObject);
+					const stop = new WayTrack.Stop();
+					await stop.create(stopObject);
 
-					if (!bus.id) throw new Error("Bus not created");
+					if (!stop.id) throw new Error("Stop not created");
 
 					return res.status(200).json({
 						success: true,
 						message: "SUCCESS",
 						data: {
-							bus: {
-								id: bus.id,
-								registrationNo: bus.registrationNo,
-								busNo: bus.busNo,
-								driverID: bus.driverID,
-								schoolID: bus.schoolID,
+							stop: {
+								id: stop.id,
+								name: stop.name,
+								latitude: stop.latitude,
+								longitude: stop.longitude,
+								busID: stop.busID,
+								schoolID: stop.schoolID,
 							},
 						},
 					});
