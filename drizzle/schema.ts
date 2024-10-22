@@ -1,6 +1,7 @@
 import { pgTable } from "drizzle-orm/pg-core/table";
-import { text, uuid } from "drizzle-orm/pg-core";
+import { PgColumn, PgTableWithColumns, text, uuid } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm/relations";
+import { AnyTable } from "drizzle-orm";
 
 export const userTable = pgTable("user", {
 	id: uuid("id").primaryKey().defaultRandom(),
@@ -35,6 +36,11 @@ export const userRoleRelation = relations(userTable, ({ one }) => ({
 		fields: [userTable.id],
 		references: [coordinatorTable.id],
 		relationName: "CoordinatorUserRelation",
+	}),
+	driverTable: one(driverTable, {
+		fields: [userTable.id],
+		references: [driverTable.id],
+		relationName: "DriverUserRelation",
 	}),
 	powerTable: one(powerTable, {
 		fields: [userTable.id],
@@ -74,3 +80,61 @@ export const schoolTable = pgTable("school", {
 	image: text("image").default("https://i.imgur.com/pPaFbR2.jpeg"),
 	location: text("location").notNull(),
 });
+
+export const schoolRelation = relations(schoolTable, ({ many }) => ({
+	coordinatorTable: many(coordinatorTable, {
+		relationName: "SchoolCoordinatorRelation",
+	}),
+	driverTable: many(driverTable, {
+		relationName: "SchoolDriverRelation",
+	}),
+	busTable: many(busTable, {
+		relationName: "SchoolBusRelation",
+	}),
+}));
+
+export const busTable = pgTable("bus", {
+	id: uuid("id").primaryKey().defaultRandom(),
+	registrationNo: text("registrationNo").unique().notNull(),
+	busNo: text("busNo").notNull(),
+	driverTable: uuid("driverID").references(() => driverTable.id, {
+		onDelete: "cascade",
+	}),
+	schoolID: uuid("schoolID")
+		.references(() => schoolTable.id, { onDelete: "cascade" })
+		.notNull(),
+});
+
+export const driverTable = pgTable("driver", {
+	id: uuid("id")
+		.primaryKey()
+		.references(() => userTable.id, { onDelete: "cascade" }),
+	name: text("name").notNull(),
+	contactNo: text("contactNo").notNull(),
+	schoolID: uuid("schoolID")
+		.references(() => schoolTable.id, {
+			onDelete: "cascade",
+		})
+		.notNull(),
+});
+
+export const driverRelation = relations(driverTable, ({ one }) => ({
+	schoolTable: one(schoolTable, {
+		fields: [driverTable.schoolID],
+		references: [schoolTable.id],
+		relationName: "DriverSchoolRelation",
+	}),
+	userTable: one(userTable, {
+		fields: [driverTable.id],
+		references: [userTable.id],
+		relationName: "DriverUserRelation",
+	}),
+}));
+
+export const busRelation = relations(busTable, ({ one }) => ({
+	schoolTable: one(schoolTable, {
+		fields: [busTable.schoolID],
+		references: [schoolTable.id],
+		relationName: "BusSchoolRelation",
+	}),
+}));

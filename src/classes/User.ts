@@ -50,7 +50,7 @@ export class User implements IUser {
 			  }
 			| undefined;
 		if (id) {
-			let smth = await db.query.userTable.findFirst({
+			user = await db.query.userTable.findFirst({
 				where: eq(userTable.id, id),
 				with: {
 					roleTable: true,

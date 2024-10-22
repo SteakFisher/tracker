@@ -2,6 +2,7 @@ import { db as Supabase } from "../../drizzle/index";
 import { User as UserClass } from "./User";
 import { Coordinator as CoordinatorClass } from "./Coordinator";
 import { School as SchoolClass } from "./School";
+import { Driver as DriverClass } from "./Driver";
 
 export class WayTrack {
 	static db = Supabase;
@@ -11,4 +12,6 @@ export class WayTrack {
 	static Coordinator = CoordinatorClass;
 
 	static School = SchoolClass;
+
+	static Driver = DriverClass;
 }
