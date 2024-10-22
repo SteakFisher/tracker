@@ -97,9 +97,11 @@ export const busTable = pgTable("bus", {
 	id: uuid("id").primaryKey().defaultRandom(),
 	registrationNo: text("registrationNo").unique().notNull(),
 	busNo: text("busNo").notNull(),
-	driverTable: uuid("driverID").references(() => driverTable.id, {
-		onDelete: "cascade",
-	}),
+	driverID: uuid("driverID")
+		.references(() => driverTable.id, {
+			onDelete: "cascade",
+		})
+		.notNull(),
 	schoolID: uuid("schoolID")
 		.references(() => schoolTable.id, { onDelete: "cascade" })
 		.notNull(),

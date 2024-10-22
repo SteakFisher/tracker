@@ -3,8 +3,11 @@ import { APIErrors } from "../../../classes/APIErrors";
 import allowAccess from "../../../functions/allowAccess";
 import { z } from "zod";
 import { WayTrack } from "../../../classes/WayTrack";
+import busRoute from "./bus/bus";
 
 const router = express.Router();
+
+router.use("/", busRoute);
 
 router.post("/", allowAccess(["power"]), async (req, res) => {
 	try {
