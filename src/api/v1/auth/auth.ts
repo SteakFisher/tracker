@@ -81,6 +81,7 @@ router.post(
 								role: z.union([
 									z.literal("coordinator"),
 									z.literal("driver"),
+									z.literal("student"),
 								]),
 							})
 							.strict(),
@@ -184,6 +185,75 @@ router.post(
 									email: driver.email,
 									image: driver.image,
 									role: driver.role,
+								},
+							},
+						});
+					} else if (signUpObject.user.role === "student") {
+						if (!["power", "coordinator"].includes(payload.role)) {
+							return res
+								.status(405)
+								.json(
+									APIErrors.UNAUTHORIZED(
+										"You do not have access to that resource",
+									),
+								);
+						}
+
+						if (payload.role === "coordinator") {
+							const coordinator = new WayTrack.Coordinator();
+							await coordinator.getCoordinator(payload.id);
+
+							if (!coordinator.id)
+								throw new Error("Coordinator not found");
+
+							signUpObject.roleData.schoolID = coordinator.schoolID;
+						}
+
+						if (signUpObject.roleData.stopID) {
+							const bus = new WayTrack.Bus();
+							await bus.getByStop(signUpObject.roleData.stopID);
+							signUpObject.roleData["busID"] = bus.id;
+							console.log("Smth");
+						}
+
+						const studentData = z
+							.object({
+								registrationNo: z.string(),
+								name: z.string(),
+								studentClass: z.string(),
+								stopID: z.string(),
+								busID: z.string(),
+								schoolID: z.string(),
+							})
+							.strict()
+							.parse(signUpObject.roleData);
+
+						const student = new WayTrack.Student();
+						await student.create({
+							email: signUpObject.user.email,
+							password: signUpObject.user.password,
+							image: signUpObject.user.image,
+							registrationNo: studentData.registrationNo,
+							name: studentData.name,
+							studentClass: studentData.studentClass,
+							stopID: studentData.stopID,
+							busID: studentData.busID,
+							schoolID: studentData.schoolID,
+						});
+
+						if (!student.id) throw new Error("Student not created");
+
+						return res.status(200).json({
+							success: true,
+							message: "SUCCESS",
+							data: {
+								student: {
+									id: student.id,
+									registrationNo: student.registrationNo,
+									name: student.name,
+									studentClass: student.studentClass,
+									stopID: student.stopID,
+									busID: student.busID,
 								},
 							},
 						});

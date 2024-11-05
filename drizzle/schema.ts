@@ -133,11 +133,14 @@ export const driverRelation = relations(driverTable, ({ one }) => ({
 	}),
 }));
 
-export const busRelation = relations(busTable, ({ one }) => ({
+export const busRelation = relations(busTable, ({ one, many }) => ({
 	schoolTable: one(schoolTable, {
 		fields: [busTable.schoolID],
 		references: [schoolTable.id],
 		relationName: "BusSchoolRelation",
+	}),
+	busStopTable: many(busStopTable, {
+		relationName: "BusStopRelation",
 	}),
 }));
 
@@ -156,6 +159,19 @@ export const stopTable = pgTable("stop", {
 		.notNull(),
 });
 
+export const stopRelation = relations(stopTable, ({ one }) => ({
+	busTable: one(busTable, {
+		fields: [stopTable.busID],
+		references: [busTable.id],
+		relationName: "StopBusRelation",
+	}),
+	schoolTable: one(schoolTable, {
+		fields: [stopTable.schoolID],
+		references: [schoolTable.id],
+		relationName: "StopSchoolRelation",
+	}),
+}));
+
 export const busStopTable = pgTable("bus-stop", {
 	id: uuid("id").primaryKey().defaultRandom(),
 	busID: uuid("busID")
@@ -163,5 +179,38 @@ export const busStopTable = pgTable("bus-stop", {
 		.notNull(),
 	stopID: uuid("stopID")
 		.references(() => stopTable.id, { onDelete: "cascade" })
+		.notNull(),
+});
+
+export const busStopRelation = relations(busStopTable, ({ one }) => ({
+	busTable: one(busTable, {
+		fields: [busStopTable.busID],
+		references: [busTable.id],
+		relationName: "BusStopBusRelation",
+	}),
+	stopTable: one(stopTable, {
+		fields: [busStopTable.stopID],
+		references: [stopTable.id],
+		relationName: "BusStopStopRelation",
+	}),
+}));
+
+export const studentTable = pgTable("student", {
+	id: uuid("id")
+		.primaryKey()
+		.references(() => userTable.id, { onDelete: "cascade" }),
+	registrationNo: text("registrationNo").notNull(),
+	name: text("name").notNull(),
+	class: text("class").notNull(),
+	stopID: uuid("stopID")
+		.references(() => stopTable.id, { onDelete: "cascade" })
+		.notNull(),
+	busID: uuid("busID")
+		.references(() => busTable.id, { onDelete: "cascade" })
+		.notNull(),
+	schoolID: uuid("schoolID")
+		.references(() => schoolTable.id, {
+			onDelete: "cascade",
+		})
 		.notNull(),
 });

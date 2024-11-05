@@ -1,5 +1,6 @@
 import { db as Supabase } from "../../drizzle";
-import { busTable } from "../../drizzle/schema";
+import { busTable, stopTable } from "../../drizzle/schema";
+import { eq } from "drizzle-orm";
 
 export interface IBus {
 	id: string | undefined;
@@ -50,5 +51,27 @@ export class Bus implements IBus {
 		this.busNo = bus[0].busNo;
 		this.driverID = bus[0].driverID;
 		this.schoolID = bus[0].schoolID;
+	}
+
+	async getByStop(stopID: string, db?: typeof Supabase) {
+		if (!db) db = Supabase;
+
+		const bus = await db.query.stopTable.findFirst({
+			where: eq(stopTable.id, stopID),
+			columns: {
+				id: true,
+			},
+			with: {
+				busTable: true,
+			},
+		});
+
+		if (!bus) throw new Error("Bus not found");
+
+		this.id = bus.busTable.id;
+		this.registrationNo = bus.busTable.registrationNo;
+		this.busNo = bus.busTable.busNo;
+		this.driverID = bus.busTable.driverID;
+		this.schoolID = bus.busTable.schoolID;
 	}
 }
