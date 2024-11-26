@@ -21,6 +21,8 @@ export interface ICoordinator extends IUser {
 		name: string;
 		schoolID: string;
 	}): Promise<void>;
+
+	getCoordinator(coordinatorID: string): Promise<void>;
 }
 
 export class Coordinator extends User implements ICoordinator {

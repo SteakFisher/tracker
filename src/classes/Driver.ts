@@ -1,14 +1,15 @@
-import { driverTable } from "../../drizzle/schema";
+import { coordinatorTable, driverTable } from "../../drizzle/schema";
 import { WayTrack } from "./WayTrack";
 import { IUser, User } from "./User";
 import { APIErrors } from "./APIErrors";
 import { School } from "./School";
+import { db as Supabase } from "../../drizzle";
+import { eq } from "drizzle-orm";
 
 export interface IDriver extends IUser {
 	name: string | undefined;
 	contactNo: string | undefined;
 	schoolID: string | undefined;
-	school: School | undefined;
 
 	create({
 		email,
@@ -23,13 +24,14 @@ export interface IDriver extends IUser {
 		name: string;
 		schoolID: string;
 	}): Promise<void>;
+
+	getDriver({ id }: { id: string }, db?: typeof Supabase): Promise<void>;
 }
 
 export class Driver extends User implements IDriver {
 	name: string | undefined;
 	contactNo: string | undefined;
 	schoolID: string | undefined;
-	school: School | undefined;
 
 	public async create({
 		email,
@@ -73,5 +75,22 @@ export class Driver extends User implements IDriver {
 		this.name = driver[0].name;
 		this.contactNo = driver[0].contactNo;
 		this.schoolID = driver[0].schoolID;
+	}
+
+	async getDriver({ id }: { id: string }, db?: typeof Supabase) {
+		if (!db) db = Supabase;
+		const [_, driver] = await Promise.all([
+			super.getUser({ id: id }),
+			db.query.driverTable.findFirst({
+				where: eq(driverTable.id, id),
+			}),
+		]);
+
+		if (!driver) return;
+
+		this.id = driver.id;
+		this.name = driver.name;
+		this.contactNo = driver.contactNo;
+		this.schoolID = driver.schoolID;
 	}
 }

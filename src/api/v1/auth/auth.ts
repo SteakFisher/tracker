@@ -270,4 +270,74 @@ router.post(
 	},
 );
 
+router.get(
+	"/:id",
+	allowAccess(["coordinator", "student", "driver"]),
+	async (req, res) => {
+		try {
+			const payload = await auth(req);
+			let user;
+
+			if (payload.role === "coordinator") {
+				const coordinator = new WayTrack.Coordinator();
+				await coordinator.getCoordinator(payload.id);
+
+				if (!coordinator.id) throw new Error("Coordinator not found");
+
+				user = {
+					id: coordinator.id,
+					email: coordinator.email,
+					image: coordinator.image,
+					role: coordinator.role,
+					name: coordinator.name,
+					schoolID: coordinator.schoolID,
+				};
+			} else if (payload.role == "driver") {
+				const driver = new WayTrack.Driver();
+				await driver.getDriver({ id: payload.id });
+
+				if (!driver.id) throw new Error("Driver not found");
+
+				user = {
+					id: driver.id,
+					email: driver.email,
+					image: driver.image,
+					role: driver.role,
+					name: driver.name,
+					contactNo: driver.contactNo,
+					schoolID: driver.schoolID,
+				};
+			} else if (payload.role === "student") {
+				const student = new WayTrack.Student();
+				await student.getStudent({ id: payload.id });
+
+				if (!student.id) throw new Error("Student not found");
+
+				user = {
+					id: student.id,
+					email: student.email,
+					image: student.image,
+					role: student.role,
+					registrationNo: student.registrationNo,
+					name: student.name,
+					studentClass: student.studentClass,
+					stopID: student.stopID,
+					busID: student.busID,
+					schoolID: student.schoolID,
+				};
+			}
+
+			res.status(200).json({
+				success: true,
+				message: "SUCCESS",
+				data: {
+					user,
+				},
+			});
+		} catch (e) {
+			return res.status(400).json(APIErrors.UNAUTHORIZED(e));
+		}
+	},
+);
+
 export default router;

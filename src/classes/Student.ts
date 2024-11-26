@@ -3,6 +3,8 @@ import { WayTrack } from "./WayTrack";
 import { IUser, User } from "./User";
 import { APIErrors } from "./APIErrors";
 import { School } from "./School";
+import { db as Supabase } from "../../drizzle";
+import { eq } from "drizzle-orm";
 
 export interface IStudent extends IUser {
 	registrationNo: string | undefined;
@@ -33,6 +35,8 @@ export interface IStudent extends IUser {
 		busID: string;
 		schoolID: string;
 	}): Promise<void>;
+
+	getStudent({ id }: { id: string }, db?: typeof Supabase): Promise<void>;
 }
 
 export class Student extends User implements IStudent {
@@ -100,5 +104,25 @@ export class Student extends User implements IStudent {
 		this.stopID = student[0].stopID;
 		this.busID = student[0].busID;
 		this.schoolID = student[0].schoolID;
+	}
+
+	async getStudent({ id }: { id: string }, db?: typeof Supabase) {
+		if (!db) db = Supabase;
+		const [_, student] = await Promise.all([
+			super.getUser({ id: id }),
+			db.query.studentTable.findFirst({
+				where: eq(studentTable.id, id),
+			}),
+		]);
+
+		if (!student) return;
+
+		this.id = student.id;
+		this.registrationNo = student.registrationNo;
+		this.name = student.name;
+		this.studentClass = student.class;
+		this.stopID = student.stopID;
+		this.busID = student.busID;
+		this.schoolID = student.schoolID;
 	}
 }

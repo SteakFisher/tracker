@@ -18,6 +18,8 @@ export interface IBus {
 		},
 		db?: typeof Supabase,
 	): Promise<void>;
+
+	getByStop(stopID: string, db?: typeof Supabase): Promise<void>;
 }
 
 export class Bus implements IBus {
