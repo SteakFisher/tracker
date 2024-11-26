@@ -5,6 +5,7 @@ import { z } from "zod";
 import { WayTrack } from "../../../classes/WayTrack";
 import busRoute from "./bus/bus";
 import driverRoute from "./driver/driver";
+import stopRoute from "./stop/stop";
 import auth from "../../../functions/auth";
 
 const router = express.Router();
@@ -12,6 +13,8 @@ const router = express.Router();
 router.use("/", busRoute);
 
 router.use("/", driverRoute);
+
+router.use("/", stopRoute);
 
 router.post("/", allowAccess(["power"]), async (req, res) => {
 	try {

@@ -1,5 +1,6 @@
 import { db as Supabase } from "../../drizzle";
 import { busStopTable, stopTable } from "../../drizzle/schema";
+import { eq } from "drizzle-orm";
 
 export interface IStop {
 	id: string | undefined;
@@ -19,6 +20,11 @@ export interface IStop {
 		},
 		db?: typeof Supabase,
 	): Promise<void>;
+
+	getStopsBySchool(
+		{ schoolID }: { schoolID: string },
+		db?: typeof Supabase,
+	): Promise<Awaited<ReturnType<typeof Supabase.query.stopTable.findMany>>>;
 }
 
 export class Stop implements IStop {
@@ -65,5 +71,16 @@ export class Stop implements IStop {
 		this.longitude = stop.longitude;
 		this.busID = stop.busID;
 		this.schoolID = stop.schoolID;
+	}
+
+	async getStopsBySchool(
+		{ schoolID }: { schoolID: string },
+		db?: typeof Supabase,
+	) {
+		if (!db) db = Supabase;
+
+		return db.query.stopTable.findMany({
+			where: eq(stopTable.schoolID, schoolID),
+		});
 	}
 }
