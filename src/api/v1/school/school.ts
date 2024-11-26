@@ -46,4 +46,21 @@ router.post("/", allowAccess(["power"]), async (req, res) => {
 	}
 });
 
+router.get("/", allowAccess(["power"]), async (req, res) => {
+	try {
+		const school = new WayTrack.School();
+		const schoolList = await school.list();
+
+		return res.status(200).json({
+			success: true,
+			message: "SUCCESS",
+			data: {
+				schools: schoolList,
+			},
+		});
+	} catch (e) {
+		return res.status(400).json(APIErrors.DB_ERROR(e));
+	}
+});
+
 export default router;

@@ -11,6 +11,10 @@ interface ISchool {
 		{ name, location }: { name: string; location: string },
 		db?: typeof Supabase,
 	): Promise<this>;
+
+	list(
+		db?: typeof Supabase,
+	): Promise<Awaited<ReturnType<typeof Supabase.query.schoolTable.findMany>>>;
 }
 
 export class School implements ISchool {
@@ -41,5 +45,11 @@ export class School implements ISchool {
 		this.location = school[0].location;
 
 		return this;
+	}
+
+	async list(db?: typeof Supabase) {
+		if (!db) db = Supabase;
+
+		return db.query.schoolTable.findMany();
 	}
 }
