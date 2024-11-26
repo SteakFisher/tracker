@@ -1,5 +1,6 @@
 import { db as Supabase } from "../../drizzle";
 import { schoolTable } from "../../drizzle/schema";
+import { eq } from "drizzle-orm";
 
 interface ISchool {
 	id?: string;
@@ -11,6 +12,11 @@ interface ISchool {
 		{ name, location }: { name: string; location: string },
 		db?: typeof Supabase,
 	): Promise<this>;
+
+	get(
+		{ id }: { id: string },
+		db?: typeof Supabase,
+	): Promise<Awaited<ReturnType<typeof Supabase.query.schoolTable.findFirst>>>;
 
 	list(
 		db?: typeof Supabase,
@@ -45,6 +51,14 @@ export class School implements ISchool {
 		this.location = school[0].location;
 
 		return this;
+	}
+
+	async get({ id }: { id: string }, db?: typeof Supabase) {
+		if (!db) db = Supabase;
+
+		return db.query.schoolTable.findFirst({
+			where: eq(schoolTable.id, id),
+		});
 	}
 
 	async list(db?: typeof Supabase) {
