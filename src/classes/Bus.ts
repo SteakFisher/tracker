@@ -20,6 +20,11 @@ export interface IBus {
 	): Promise<void>;
 
 	getByStop(stopID: string, db?: typeof Supabase): Promise<void>;
+
+	getByDriver(
+		{ driverID }: { driverID: string },
+		db?: typeof Supabase,
+	): Promise<void>;
 }
 
 export class Bus implements IBus {
@@ -75,5 +80,28 @@ export class Bus implements IBus {
 		this.busNo = bus.busTable.busNo;
 		this.driverID = bus.busTable.driverID;
 		this.schoolID = bus.busTable.schoolID;
+	}
+
+	async getByDriver({ driverID }: { driverID: string }, db?: typeof Supabase) {
+		if (!db) db = Supabase;
+
+		const bus = await db.query.busTable.findFirst({
+			where: eq(busTable.driverID, driverID),
+			columns: {
+				id: true,
+				registrationNo: true,
+				busNo: true,
+				driverID: true,
+				schoolID: true,
+			},
+		});
+
+		if (!bus) throw new Error("Bus not found");
+
+		this.id = bus.id;
+		this.registrationNo = bus.registrationNo;
+		this.busNo = bus.busNo;
+		this.driverID = bus.driverID;
+		this.schoolID = bus.schoolID;
 	}
 }

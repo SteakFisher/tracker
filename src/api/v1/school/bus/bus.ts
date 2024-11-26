@@ -5,10 +5,12 @@ import allowAccess from "../../../../functions/allowAccess";
 import { WayTrack } from "../../../../classes/WayTrack";
 import { APIErrors } from "../../../../classes/APIErrors";
 import stopRoute from "./stop/stop";
+import locationRoute from "./location/location";
 
 const router = express.Router();
 
 router.use("/:schoolID/bus/", stopRoute);
+router.use("/:schoolID/bus/", locationRoute);
 
 router.post(
 	"/:schoolID/bus",

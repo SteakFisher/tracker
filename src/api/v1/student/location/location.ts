@@ -4,15 +4,9 @@ import auth from "../../../../functions/auth";
 import student from "../student";
 import { WayTrack } from "../../../../classes/WayTrack";
 import { APIErrors } from "../../../../classes/APIErrors";
+import { location } from "../../../Location";
 
 const router = express.Router();
-
-let location = {
-	"23bf9449-de12-4b0b-a077-e21e4ae18441": {
-		latitude: "23.2323",
-		longitude: "15.2323",
-	},
-} as { [key: string]: { latitude: string; longitude: string } };
 
 router.get(
 	"/:studentID/location",
