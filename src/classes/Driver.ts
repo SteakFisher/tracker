@@ -1,8 +1,7 @@
-import { coordinatorTable, driverTable } from "../../drizzle/schema";
+import { driverTable } from "../../drizzle/schema";
 import { WayTrack } from "./WayTrack";
 import { IUser, User } from "./User";
 import { APIErrors } from "./APIErrors";
-import { School } from "./School";
 import { db as Supabase } from "../../drizzle";
 import { eq } from "drizzle-orm";
 
@@ -26,6 +25,15 @@ export interface IDriver extends IUser {
 	}): Promise<void>;
 
 	getDriver({ id }: { id: string }, db?: typeof Supabase): Promise<void>;
+
+	listDriver(
+		{
+			schoolID,
+		}: {
+			schoolID: string;
+		},
+		db?: typeof Supabase,
+	): Promise<Awaited<ReturnType<typeof Supabase.query.driverTable.findMany>>>;
 }
 
 export class Driver extends User implements IDriver {
@@ -92,5 +100,12 @@ export class Driver extends User implements IDriver {
 		this.name = driver.name;
 		this.contactNo = driver.contactNo;
 		this.schoolID = driver.schoolID;
+	}
+
+	async listDriver({ schoolID }: { schoolID: string }, db?: typeof Supabase) {
+		if (!db) db = Supabase;
+		return db.query.driverTable.findMany({
+			where: eq(driverTable.schoolID, schoolID),
+		});
 	}
 }

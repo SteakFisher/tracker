@@ -4,11 +4,14 @@ import allowAccess from "../../../functions/allowAccess";
 import { z } from "zod";
 import { WayTrack } from "../../../classes/WayTrack";
 import busRoute from "./bus/bus";
+import driverRoute from "./driver/driver";
 import auth from "../../../functions/auth";
 
 const router = express.Router();
 
 router.use("/", busRoute);
+
+router.use("/", driverRoute);
 
 router.post("/", allowAccess(["power"]), async (req, res) => {
 	try {
