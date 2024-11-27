@@ -12,6 +12,44 @@ const router = express.Router();
 router.use("/:schoolID/bus/", stopRoute);
 router.use("/:schoolID/bus/", locationRoute);
 
+router.get(
+	"/:schoolID/bus",
+	allowAccess(["power", "coordinator"]),
+	async (req, res) => {
+		try {
+			const payload = await auth(req);
+			let schoolID = req.params.schoolID;
+
+			if (payload.role == "coordinator") {
+				const coordinator = new WayTrack.Coordinator();
+				await coordinator.getCoordinator(payload.id);
+
+				if (!coordinator.id || !coordinator.schoolID)
+					throw new Error("Coordinator not found");
+
+				schoolID = coordinator.schoolID;
+			}
+
+			try {
+				const bus = new WayTrack.Bus();
+				const buses = await bus.listBuses({ schoolID });
+
+				return res.status(200).json({
+					success: true,
+					message: "SUCCESS",
+					data: {
+						buses: buses,
+					},
+				});
+			} catch (e) {
+				return res.status(400).json(APIErrors.DB_ERROR(e));
+			}
+		} catch (e) {
+			return res.status(400).json(APIErrors.UNAUTHORIZED(e));
+		}
+	},
+);
+
 router.post(
 	"/:schoolID/bus",
 	allowAccess(["power", "coordinator"]),

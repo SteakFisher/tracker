@@ -25,6 +25,11 @@ export interface IBus {
 		{ driverID }: { driverID: string },
 		db?: typeof Supabase,
 	): Promise<void>;
+
+	listBuses(
+		{ schoolID }: { schoolID: string },
+		db?: typeof Supabase,
+	): Promise<Awaited<ReturnType<typeof Supabase.query.busTable.findMany>>>;
 }
 
 export class Bus implements IBus {
@@ -103,5 +108,22 @@ export class Bus implements IBus {
 		this.busNo = bus.busNo;
 		this.driverID = bus.driverID;
 		this.schoolID = bus.schoolID;
+	}
+
+	async listBuses({ schoolID }: { schoolID: string }, db?: typeof Supabase) {
+		if (!db) db = Supabase;
+
+		const buses = await db.query.busTable.findMany({
+			where: eq(busTable.schoolID, schoolID),
+			columns: {
+				id: true,
+				registrationNo: true,
+				busNo: true,
+				driverID: true,
+				schoolID: true,
+			},
+		});
+
+		return buses;
 	}
 }
